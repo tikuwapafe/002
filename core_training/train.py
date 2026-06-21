@@ -208,7 +208,8 @@ def train():
         config=config,
         cache_dir=training_args.cache_dir,
         trust_remote_code=model_args.trust_remote_code,
-        attn_implementation="flash_attention_2",
+        # attn_implementation="flash_attention_2",
+        attn_implementation="sdpa",
         torch_dtype=torch.bfloat16
     )
 
