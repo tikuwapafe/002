@@ -705,10 +705,10 @@ def main():
 
     print(f"Loaded {len(full_train_dataset)} samples")
     if args.max_samples is not None and args.max_samples > 0:
-    full_train_dataset = full_train_dataset.select(
-        range(min(args.max_samples, len(full_train_dataset)))
-    )
-    print(f"[quick test] Limiting to {len(full_train_dataset)} samples")
+        full_train_dataset = full_train_dataset.select(
+            range(min(args.max_samples, len(full_train_dataset)))
+        )
+        print(f"[quick test] Limiting to {len(full_train_dataset)} samples")
 
     if world_size > 1:
         total_samples = len(full_train_dataset)
