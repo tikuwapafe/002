@@ -498,6 +498,10 @@ def create_argument_parser():
     # Dataset configuration
     data_group = parser.add_argument_group('Dataset Configuration')
     data_group.add_argument(
+    "--max_samples", type=int, default=-1,
+    help="Limit number of problems for quick testing. -1 = no limit"
+    )
+    data_group.add_argument(
         "--mode", type=str,
         choices=["train", "test"],
         default="train",
@@ -700,6 +704,11 @@ def main():
     ])
 
     print(f"Loaded {len(full_train_dataset)} samples")
+    if args.max_samples is not None and args.max_samples > 0:
+    full_train_dataset = full_train_dataset.select(
+        range(min(args.max_samples, len(full_train_dataset)))
+    )
+    print(f"[quick test] Limiting to {len(full_train_dataset)} samples")
 
     if world_size > 1:
         total_samples = len(full_train_dataset)
