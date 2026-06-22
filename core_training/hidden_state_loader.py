@@ -7,6 +7,7 @@ import torch
 import datasets
 from datasets import load_dataset, Split
 from tqdm import tqdm
+from pathlib import Path
 
 class HiddenStateLoader:
     def __init__(self, dataset_name):
@@ -18,9 +19,15 @@ class HiddenStateLoader:
 
     def _load_data(self):
         print(f"Loading tensor data from {self.dataset_name}")
-        self.dataset = datasets.load_dataset(self.dataset_name, split=datasets.Split.TRAIN)
-
-        print(f"Loaded {len(self.dataset)} records.")
+        dataset_path = Path(self.dataset_name)
+        if (dataset_path / "data_full.parquet").is_file():
+            self.dataset = datasets.load_dataset(
+                "parquet",
+                data_files=str(dataset_path / "data_full.parquet"),
+                split="train"
+            )
+        else:
+            self.dataset = datasets.load_dataset(self.dataset_name, split=datasets.Split.TRAIN)
 
         def optimized_convert_nested_arrays_with_plan(df):
             """Optimized nested array conversion (following PyTorch recommendations) + including plan text"""
