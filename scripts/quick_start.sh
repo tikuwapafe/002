@@ -133,6 +133,10 @@ else
 fi
 echo "========================================================"
 
+# GPU and memory settings
+export CUDA_VISIBLE_DEVICES=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 # Create directories
 mkdir -p data/datasets data/logs data/models
 DATA_DIR="./data"
@@ -248,14 +252,15 @@ python core_training/train.py \
     --hidden_data "$HIDDEN_DATA_DIR" \
     --output_dir "$MODEL_OUTPUT_DIR" \
     --num_train_epochs "$EPOCHS" \
-    --per_device_train_batch_size 2 \
+    --per_device_train_batch_size 1 \
     --learning_rate 5e-5 \
-    --prepended_length 128 \
+    --prepended_length 32 \
     --save_strategy "epoch" \
     --logging_steps 10 \
     --save_total_limit 2 \
     --dataloader_num_workers 2 \
-    --report_to "none"
+    --report_to "none" \
+    --gradient_checkpointing True
 
 if [[ $? -ne 0 ]]; then
     print_error "Training failed"
