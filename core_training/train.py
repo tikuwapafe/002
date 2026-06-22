@@ -96,7 +96,7 @@ def detect_precision() -> str:
     if device.major >= 8:
         print(f"GPU {device.name} supports bfloat16, using bf16 mixed precision")
         return "bf16"
-    elif device.supports_fp16:
+    elif device.major >= 7:
         print(f"GPU {device.name} supports float16, using fp16 mixed precision")
         return "fp16"
     else:
