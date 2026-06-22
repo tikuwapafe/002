@@ -1,0 +1,180 @@
+(env002) nanari@fermat:~/002$ python data_collection/collect_data.py math     --model_path "Qwen/Qwen2.5-0.5B-Instruct"     --output_dir ./data/test_math_hidden     --mode train     --subjects algebra     --max_samples 5     --max_new_tokens 256     --verbose
+==================================================
+Math Data Collection Configuration
+==================================================
+Model: Qwen/Qwen2.5-0.5B-Instruct
+Mode: train
+Subjects: ['algebra']
+Output: ./data/test_math_hidden
+Temperature: 0.8
+Max tokens: 256
+Torch dtype: float32
+==================================================
+Environment variables before setup:
+RANK: Not set
+WORLD_SIZE: Not set
+LOCAL_RANK: Not set
+MASTER_ADDR: Not set
+MASTER_PORT: Not set
+Hostname: fermat
+Available GPU count: 4
+Using rank: -1, local_rank: -1, world_size: 4
+Error initializing process group: Error initializing torch.distributed using env:// rendezvous: environment variable RANK expected, but not set
+Traceback (most recent call last):
+  File "/raid/nanari/002/data_collection/math_collection.py", line 280, in setup_distributed
+    dist.init_process_group(
+  File "/home/nanari/anaconda3/envs/env002/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 81, in wrapper
+    return func(*args, **kwargs)
+  File "/home/nanari/anaconda3/envs/env002/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 95, in wrapper
+    func_return = func(*args, **kwargs)
+  File "/home/nanari/anaconda3/envs/env002/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1710, in init_process_group
+    store, rank, world_size = next(rendezvous_iterator)
+  File "/home/nanari/anaconda3/envs/env002/lib/python3.10/site-packages/torch/distributed/rendezvous.py", line 267, in _env_rendezvous_handler
+    rank = int(_get_env_or_raise("RANK"))
+  File "/home/nanari/anaconda3/envs/env002/lib/python3.10/site-packages/torch/distributed/rendezvous.py", line 252, in _get_env_or_raise
+    raise _env_error(env_var)
+ValueError: Error initializing torch.distributed using env:// rendezvous: environment variable RANK expected, but not set
+Falling back to single-process mode
+After setup: Rank = 0, World Size = 1
+Running in train mode with temperature=0.8
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights: 100%|██████████████████████████████████████████████| 290/290 [00:00<00:00, 642.38it/s]
+Model initialized on GPU 0.
+Loaded 1744 samples
+[quick test] Limiting to 5 samples
+Single process mode - handling all 5 samples | base_offset=0
+GPU 0 number of samples to process: 5
+GPU 0 processing:   0%|                                                          | 0/5 [00:00<?, ?it/s]GPU 0, batch 0/5, global_id=MATH_1, processing: Let \[f(x) = \left\{
+\begin{array}{cl} ax+3, &\tex...
+Agent 1 output: To ensure the piecewise function is continuous, we need to ensure that the value of the function approaches the same value as \( x \) approaches \(-2\) from both the left and the right sides. This means that the value of the function at \( x = -2 \) from the left must be equal to the value of the function at \( x = -2 \) from the right.
+
+Given the piecewise function:
+\[ f(x) = \left\{
+\begin{array}{cl} ax+3, &\text{ if }x>2, \\
+x-5 &\text{ if } -2 \le x \le 2, \\
+2x-b &\text{ if } x <-2.
+\end{array}
+\right. \]
+
+The left-hand limit as \( x \) approaches \(-2\) from the left is \( f(-2^-) \), and the right-hand limit as \( x \) approaches \(-2\) from the right is \( f(-2^+) \).
+
+First, calculate \( f(-2^-) \):
+\[ f(-2^-) = (-2)^{-5} = \frac{1}{(-2)^5} = \frac{1}{
+GPU 0 processing:  20%|██████████                                        | 1/5 [00:10<00:42, 10.52s/it]GPU 0, batch 1/5, global_id=MATH_2, processing: A rectangular band formation is a formation with $...
+Agent 1 output: **Plan:**
+
+1. **Define Variables:**
+   Let \( m \) be the number of members in each row and \( r \) be the number of rows. Therefore, the total number of band members \( n \) is given by:
+   \[
+   n = m \times r
+   \]
+
+2. **Initial Conditions:**
+   - The director has two members left over when he arranges the band in a rectangular formation.
+   - If he increases the number of members in each row by 1 and reduces the number of rows by 2, there are exactly enough places in the new formation for each band member.
+
+3. **First Condition:**
+   The director has two members left over when arranging the band in a rectangular formation:
+   \[
+   n = m \times r + 2
+   \]
+
+4. **Second Condition:**
+   If he increases the number of members in each row by 1 and reduces the number of rows by 2, there are exactly enough places for each member:
+   \[
+   m \times (r - 2) + 1 = m \times r - 2
+   \]
+
+5. **Formulate Equations:**
+   From the first condition:
+
+GPU 0 processing:  40%|████████████████████                              | 2/5 [00:20<00:30, 10.11s/it]GPU 0, batch 2/5, global_id=MATH_3, processing: What is the degree of the polynomial $(4 +5x^3 +10...
+Agent 1 output: To find the degree of the polynomial, we need to determine the highest power of the variable in the polynomial. The given polynomial is:
+
+\[ 4 + 5x^3 + 100 + 2\pi x^4 + \sqrt{10}x^4 + 9 \]
+
+First, let's identify the variables and their degrees:
+
+- \(4\) is a constant term and has degree 0.
+- \(5x^3\) has a degree of 3.
+- \(100\) is a constant term and has degree 0.
+- \(2\pi x^4\) has a degree of 4.
+- \(\sqrt{10}x^4\) has a degree of 4.
+- \(9\) is a constant term and has degree 0.
+
+Now, we compare the degrees of all terms:
+- The degree of the constant term \(4\) is 0.
+- The degree of \(5x^3\) is 3.
+- The degree of \(100\) is 0.
+- The degree of \(2\pi x^4\) is 4.
+- The degree of \(\sqrt{10}x^4\) is 4.
+- The
+GPU 0 processing:  60%|██████████████████████████████                    | 3/5 [00:30<00:19,  9.99s/it]GPU 0, batch 3/5, global_id=MATH_4, processing: Evaluate $\left\lceil3\left(6-\frac12\right)\right...
+Agent 1 output: To evaluate the expression \(\left\lceil 3\left(6 - \frac{1}{2}\right) \right\rceil\), we will follow these steps:
+
+1. First, calculate the value inside the parentheses: \(6 - \frac{1}{2}\).
+2. Then, multiply the result by 3.
+3. Finally, apply the ceiling function to the result.
+
+Let's start with the first step:
+
+1. Calculate \(6 - \frac{1}{2}\):
+\[ 6 - \frac{1}{2} = \frac{12}{2} - \frac{1}{2} = \frac{11}{2} \]
+
+Now we have:
+\[ \left\lceil 3 \cdot \frac{11}{2} \right\rceil \]
+
+Next, multiply 3 by \(\frac{11}{2}\):
+\[ 3 \cdot \frac{11}{2} = \frac{33}{2} \]
+
+Now we have:
+\[ \left\lceil \frac{33}{2} \right\rceil \]
+
+Finally, apply the ceiling function to \(\frac{33}{2}\):
+\[ \left
+GPU 0 processing:  80%|████████████████████████████████████████          | 4/5 [00:40<00:09,  9.94s/it]GPU 0, batch 4/5, global_id=MATH_5, processing: Sam is hired for a 20-day period. On days that he ...
+Agent 1 output: To determine how many days Sam did not work, we can set up an equation based on the information provided.
+
+Let \( x \) be the number of days Sam did not work. Therefore, the number of days he worked is \( 20 - x \).
+
+The earnings for the days he worked are \( 60x \).
+
+The earnings for the days he did not work are \( 30 \times (20 - x) \).
+
+The total earnings at the end of the 20-day period are given as $660. Therefore, we can write the equation:
+
+\[ 60x + 30(20 - x) = 660 \]
+
+Now, let's solve this equation step by step.
+
+1. Distribute the 30:
+
+\[ 60x + 600 - 30x = 660 \]
+
+2. Combine like terms:
+
+\[ 30x + 600 = 660 \]
+
+3. Subtract 600 from both sides:
+
+\[ 30x = 660 - 600 \]
+
+\[ 30x = 60 \]
+
+4. Divide both sides by 3
+GPU 0 processing: 100%|██████████████████████████████████████████████████| 5/5 [00:50<00:00, 10.00s/it]
+Saving the dataset (1/1 shards): 100%|███████████████████████████| 5/5 [00:00<00:00, 616.95 examples/s]
+✅ HuggingFace Dataset saved to ./data/test_math_hidden/hf_dataset
+✅ Single Parquet file saved: ./data/test_math_hidden/data_full.parquet
+✅ Wrote shard #0 -> ./data/test_math_hidden/parquet_shards/data-00000.parquet
+✅ Parquet shards saved to ./data/test_math_hidden/parquet_shards (≤ 2.0GB each)
+GPU 0 completed processing 5 tasks.
+
+
+
+
+
+
+
+
