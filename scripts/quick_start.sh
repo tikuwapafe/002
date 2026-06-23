@@ -221,29 +221,27 @@ print_step "3" "Training Data Preparation"
 TRAINING_DATA="$EXPERIMENT_DIR/training_data.json"
 
 # Create a minimal training data file for demonstration
-python - "$HIDDEN_DATA_DIR" "$TRAINING_DATA" -1 << 'PY'
+python3 - "$HIDDEN_DATA_DIR" "$TRAINING_DATA" << 'PY'
 import json, sys
+import pandas as pd
 from pathlib import Path
-from datasets import load_dataset
 
 hidden_dir = Path(sys.argv[1])
 output_path = Path(sys.argv[2])
-max_samples = int(sys.argv[3])
 
-ds = load_dataset("parquet", data_files=str(hidden_dir / "data_full.parquet"), split="train")
-limit = len(ds) if max_samples < 0 else min(len(ds), max_samples)
+df = pd.read_parquet(
+    str(hidden_dir / "data_full.parquet"),
+    columns=["task_id", "task", "plan"]
+)
 rows = []
-for row in ds.select(range(limit)):
-    task_id = str(row.get("task_id") or row.get("id") or len(rows))
-    task    = str(row.get("task") or "Solve the task.")
-    plan    = str(row.get("plan") or "Use the latent plan to solve the task.")
+for _, row in df.iterrows():
     rows.append({
-        "id": task_id,
+        "id": str(row["task_id"]),
         "conversations": [
             {"from": "human", "value": "You are solving an interactive reasoning task."},
             {"from": "gpt",   "value": "I will use the latent communication to help solve it."},
-            {"from": "human", "value": task},
-            {"from": "gpt",   "value": plan},
+            {"from": "human", "value": str(row["task"])},
+            {"from": "gpt",   "value": str(row["plan"])},
         ],
     })
 output_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
