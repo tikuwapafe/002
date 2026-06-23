@@ -246,7 +246,7 @@ Solution:"""
         logger.info(f"Loading dataset: {dataset_name}")
 
         try:
-            dataset = load_dataset(dataset_name, split=split)
+            dataset = load_dataset(dataset_name, "algebra", split=split)
         except Exception as e:
             logger.error(f"Failed to load dataset: {e}")
             raise
