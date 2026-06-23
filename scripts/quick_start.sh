@@ -264,6 +264,7 @@ python core_training/train.py \
     --per_device_train_batch_size 1 \
     --learning_rate 5e-5 \
     --prepended_length 32 \
+    --model_max_length 1024 \
     --save_strategy "epoch" \
     --logging_steps 10 \
     --save_total_limit 2 \
