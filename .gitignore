@@ -206,3 +206,6 @@ submit.sh.bak
 # Backup files
 *.bak
 *.backup
+
+# 追記
+eval_results/
