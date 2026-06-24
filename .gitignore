@@ -209,3 +209,7 @@ submit.sh.bak
 
 # 追記
 eval_results/
+eval/math/results_inference/
+eval/math/results_inference_350/
+eval/math/results_inference_v2/
+eval/math/visualizations/
