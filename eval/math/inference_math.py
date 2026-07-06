@@ -18,6 +18,7 @@ import os
 import re
 import json
 import math
+import random
 import argparse
 import logging
 from datetime import datetime
@@ -792,6 +793,10 @@ def parse_args():
         "--num_samples", type=int, default=None,
         help="評価問題数（デフォルト: 全問）。動作確認には 10 など小さい値を推奨",
     )
+    parser.add_argument(
+        "--seed", type=int, default=42,
+        help="乱数シード（Sender/Studentの生成を再現可能にする）",
+    )
 
     # Sender 生成パラメータ（math_collection.py のデフォルトに合わせた）
     parser.add_argument("--sender_max_new_tokens", type=int, default=1500)
@@ -856,11 +861,23 @@ def load_prepended_config(trained_model_path: str) -> Optional[Dict]:
     return None
 
 
+def set_seed(seed: int) -> None:
+    """Sender/Studentのdo_sample生成を再現可能にするためのシード固定"""
+    random.seed(seed)
+    import numpy as np
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
 def main():
     args = parse_args()
     device = resolve_device(args.device)
     dtype = resolve_dtype(args.torch_dtype)
 
+    set_seed(args.seed)
+    logger.info(f"Seed固定: {args.seed}")
     logger.info(f"Device: {device}, dtype: {dtype}")
     logger.info(f"Condition: {args.condition}")
 
