@@ -530,8 +530,10 @@ def run_baseline(
     baseline: BaselineModel,
     dataset,
     output_dir: str,
+    condition: str = "A",
 ) -> Dict[str, Any]:
-    """条件A（hidden statesなし）の推論を実行する"""
+    """条件A・D（hidden statesなし）の推論を実行する。
+    condition="A": 未学習モデル / condition="D": 学習済みモデル"""
     os.makedirs(output_dir, exist_ok=True)
     extractor = AnswerExtractor()
 
@@ -539,7 +541,7 @@ def run_baseline(
     correct = 0
     total = 0
 
-    pbar = tqdm(total=len(dataset), desc="Condition A")
+    pbar = tqdm(total=len(dataset), desc=f"Condition {condition}")
 
     for idx, item in enumerate(dataset):
         question   = item["problem"]
@@ -553,7 +555,7 @@ def run_baseline(
             is_correct, pred, norm_gt = extractor.evaluate(model_output, solution)
 
             result = InferenceResult(
-                condition="A",
+                condition=condition,
                 question_id=question_id,
                 question=question,
                 ground_truth=solution,
@@ -571,7 +573,7 @@ def run_baseline(
                 correct += 1
 
         except Exception as e:
-            logger.error(f"[Condition A] Error on {question_id}: {e}")
+            logger.error(f"[Condition {condition}] Error on {question_id}: {e}")
             total += 1
 
         pbar.update(1)
@@ -585,24 +587,24 @@ def run_baseline(
 
     accuracy = correct / total if total > 0 else 0.0
     summary = {
-        "condition": "A",
+        "condition": condition,
         "total_questions": total,
         "correct": correct,
         "accuracy": accuracy,
         "timestamp": datetime.now().isoformat(),
     }
 
-    results_path = os.path.join(output_dir, "condition_A_results.jsonl")
+    results_path = os.path.join(output_dir, f"condition_{condition}_results.jsonl")
     with open(results_path, "w", encoding="utf-8") as f:
         for r in results:
             f.write(json.dumps(asdict(r), ensure_ascii=False) + "\n")
 
-    summary_path = os.path.join(output_dir, "condition_A_summary.json")
+    summary_path = os.path.join(output_dir, f"condition_{condition}_summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
 
     logger.info(
-        f"[Condition A] Done: {correct}/{total} = {accuracy:.3f} → {output_dir}"
+        f"[Condition {condition}] Done: {correct}/{total} = {accuracy:.3f} → {output_dir}"
     )
     return summary
 
@@ -750,13 +752,14 @@ def parse_args():
     # 条件選択
     parser.add_argument(
         "--condition", type=str,
-        choices=["A", "B", "C", "AB", "BC", "AC", "all"], default="all",
+        choices=["A", "B", "C", "D", "AB", "BC", "AC", "AD", "CD", "all"], default="all",
         help=(
             "実行する条件: "
             "A（未学習+hidden statesなし）/ "
             "B（未学習+hidden states）/ "
             "C（学習済み+hidden states）/ "
-            "AB / BC / AC / all（全条件）"
+            "D（学習済み+hidden statesなし）/ "
+            "AB / BC / AC / AD / CD / all（全条件）"
         ),
     )
 
@@ -888,8 +891,8 @@ def main():
         num_heads = int(prepended_cfg["mha_num_heads"])
         logger.info(f"Using num_heads={num_heads} from prepended_config.json")
 
-    # ── Sender（条件B・Cのみ必要）────────────────────────────────────
-    needs_sender = args.condition not in ("A",)
+    # ── Sender（条件B・Cのみ必要。A・Dはhidden statesを使わないので不要）───
+    needs_sender = args.condition not in ("A", "D", "AD")
     sender_hidden_size = 0
     if needs_sender:
         sender = SenderModel(
@@ -905,7 +908,7 @@ def main():
         sender_hidden_size = sender.hidden_size
 
     # ── HiddenStateProcessor（条件B・Cのみ必要）────────────────────────
-    needs_hidden = args.condition not in ("A",)
+    needs_hidden = args.condition not in ("A", "D", "AD")
     processor = None
 
     if needs_hidden:
@@ -941,7 +944,7 @@ def main():
     summaries = {}
 
     # ── 条件A: 未学習 + hidden states なし（ベースライン）──────────────
-    if args.condition in ("A", "AB", "AC", "all"):
+    if args.condition in ("A", "AB", "AC", "AD", "all"):
         logger.info("=" * 60)
         logger.info("Condition A: Base (untrained) model, no hidden states [baseline]")
         logger.info("=" * 60)
@@ -994,7 +997,7 @@ def main():
         torch.cuda.empty_cache()
 
     # ── 条件C: 学習済み + hidden states ──────────────────────────────
-    if args.condition in ("C", "BC", "AC", "all"):
+    if args.condition in ("C", "BC", "AC", "CD", "all"):
         logger.info("=" * 60)
         logger.info("Condition C: Trained model + hidden states")
         logger.info("=" * 60)
@@ -1019,6 +1022,32 @@ def main():
         summaries["C"] = summary_C
 
         del student_C
+        torch.cuda.empty_cache()
+
+    # ── 条件D: 学習済み + hidden statesなし ──────────────────────────
+    if args.condition in ("D", "AD", "CD", "all"):
+        logger.info("=" * 60)
+        logger.info("Condition D: Trained model, no hidden states")
+        logger.info("=" * 60)
+
+        baseline_D = BaselineModel(
+            model_path=args.trained_model_path,
+            device=device,
+            torch_dtype=dtype,
+            max_new_tokens=args.student_max_new_tokens,
+            temperature=args.student_temperature,
+            do_sample=args.student_do_sample,
+        )
+
+        summary_D = run_baseline(
+            baseline=baseline_D,
+            dataset=dataset,
+            output_dir=os.path.join(args.output_dir, "condition_D"),
+            condition="D",
+        )
+        summaries["D"] = summary_D
+
+        del baseline_D
         torch.cuda.empty_cache()
 
     # ── 最終サマリー ──────────────────────────────────────────────────
