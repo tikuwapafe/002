@@ -219,3 +219,5 @@ eval/math/results_inference_D/
 check_length_distribution.py 
 # data_full.parquetの中身を見る
 check_parquet.py 
+
+eval/math/results_inference_fixed/

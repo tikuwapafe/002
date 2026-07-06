@@ -373,12 +373,13 @@ class StudentModel:
         model_dtype = self.model.get_input_embeddings().weight.dtype
         emb = self.model.get_input_embeddings()
 
-        # ── ① <|im_end|> までの "before" 部分 ──────────────────────────
+        # ── ① <bop> までの "before" 部分（オリジナル hidden_agent.py と同じ位置に <bop> を含める）
         before_text = (
             "<|im_start|>user\n"
             "Solve the following math problem step by step. "
             "Show your work clearly and put your final answer in \\boxed{}."
-            "\n\nProblem: " + question + "\n<|im_end|>"
+            "\n\nProblem: " + question
+            + "\nNow, you are given a step-by-step plan to complete this task as follow: <bop>"
         )
         before_tok = self.tokenizer(
             before_text, return_tensors="pt", add_special_tokens=False
@@ -391,8 +392,18 @@ class StudentModel:
         ).squeeze(0).to(model_dtype)                                   # [T, H]
         prefix_embeds = hidden_processed.unsqueeze(0)                  # [1, T, H]
 
-        # ── ③ "after" 部分（生成の起点となる assistant ヘッダ）────────────
-        after_text = "\n<|im_start|>assistant\n"
+        # ── ③ <eop> + <|im_end|> + assistant ヘッダ（オリジナルと同じ分割・順序）────
+        eop_tok = self.tokenizer(
+            "<eop>", return_tensors="pt", add_special_tokens=False
+        ).to(self.device)
+        eop_embeds = emb(eop_tok["input_ids"]).to(model_dtype)
+
+        end_tok = self.tokenizer(
+            "<|im_end|>\n", return_tensors="pt", add_special_tokens=False
+        ).to(self.device)
+        end_embeds = emb(end_tok["input_ids"]).to(model_dtype)
+
+        after_text = "<|im_start|>assistant\n"
         after_tok = self.tokenizer(
             after_text, return_tensors="pt", add_special_tokens=False
         ).to(self.device)
@@ -400,8 +411,8 @@ class StudentModel:
 
         # ── ④ 結合 ────────────────────────────────────────────────────────
         inputs_embeds = torch.cat(
-            [before_embeds, prefix_embeds, after_embeds], dim=1
-        )  # [1, L_b + T + L_a, H]
+            [before_embeds, prefix_embeds, eop_embeds, end_embeds, after_embeds], dim=1
+        )  # [1, L_b + T + L_eop + L_end + L_a, H]
 
         total_len = inputs_embeds.size(1)
         attention_mask = torch.ones(
