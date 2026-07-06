@@ -213,3 +213,9 @@ eval/math/results_inference/
 eval/math/results_inference_350/
 eval/math/results_inference_v2/
 eval/math/visualizations/
+# 条件D評価用
+eval/math/results_inference_D/ 
+# hidden states長の分布をみる
+check_length_distribution.py 
+# data_full.parquetの中身を見る
+check_parquet.py 
